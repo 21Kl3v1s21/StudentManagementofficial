@@ -819,8 +819,8 @@ namespace StudentManagement.StudentDBDataSet1TableAdapters {
             this._adapter.InsertCommand = new global::System.Data.SqlClient.SqlCommand();
             this._adapter.InsertCommand.Connection = this.Connection;
             this._adapter.InsertCommand.CommandText = "INSERT INTO [dbo].[Course] ([CourseId], [Course], [Duration]) VALUES (@CourseId, " +
-                "@Course, @Duration);\r\nSELECT CourseId, Course, Duration FROM Course WHERE (Cours" +
-                "eId = @CourseId)";
+                "@Course, @Duration);\nSELECT CourseId, Course, Duration FROM Course WHERE (Course" +
+                "Id = @CourseId)";
             this._adapter.InsertCommand.CommandType = global::System.Data.CommandType.Text;
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@CourseId", global::System.Data.SqlDbType.Int, 0, global::System.Data.ParameterDirection.Input, 0, 0, "CourseId", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Course", global::System.Data.SqlDbType.VarChar, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Course", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));

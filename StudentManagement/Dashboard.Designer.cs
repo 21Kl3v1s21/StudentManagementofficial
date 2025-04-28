@@ -32,6 +32,7 @@ namespace StudentManagement
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Dashboard));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label9 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -45,7 +46,6 @@ namespace StudentManagement
             this.panel5 = new System.Windows.Forms.Panel();
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -64,6 +64,18 @@ namespace StudentManagement
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(800, 50);
             this.panel1.TabIndex = 0;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(776, 9);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(21, 20);
+            this.label9.TabIndex = 3;
+            this.label9.Text = "X";
+            this.label9.Click += new System.EventHandler(this.label9_Click);
             // 
             // label1
             // 
@@ -118,6 +130,7 @@ namespace StudentManagement
             this.label7.TabIndex = 2;
             this.label7.Text = "0";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label7.Click += new System.EventHandler(this.label7_Click);
             // 
             // label2
             // 
@@ -128,6 +141,7 @@ namespace StudentManagement
             this.label2.Size = new System.Drawing.Size(75, 16);
             this.label2.TabIndex = 0;
             this.label2.Text = "Students: ";
+            this.label2.Click += new System.EventHandler(this.label2_Click_1);
             // 
             // panel4
             // 
@@ -199,18 +213,6 @@ namespace StudentManagement
             this.label3.Size = new System.Drawing.Size(15, 16);
             this.label3.TabIndex = 1;
             this.label3.Text = "0";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(776, 9);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(21, 20);
-            this.label9.TabIndex = 3;
-            this.label9.Text = "X";
-            this.label9.Click += new System.EventHandler(this.label9_Click);
             // 
             // Dashboard
             // 

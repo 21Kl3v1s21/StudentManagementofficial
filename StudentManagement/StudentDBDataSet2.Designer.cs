@@ -862,8 +862,8 @@ namespace StudentManagement.StudentDBDataSet2TableAdapters {
             this._adapter.InsertCommand = new global::System.Data.SqlClient.SqlCommand();
             this._adapter.InsertCommand.Connection = this.Connection;
             this._adapter.InsertCommand.CommandText = "INSERT INTO [dbo].[Enroll] ([Eid], [StudentName], [Course], [EnrollDate]) VALUES " +
-                "(@Eid, @StudentName, @Course, @EnrollDate);\r\nSELECT Eid, StudentName, Course, En" +
-                "rollDate FROM Enroll WHERE (Eid = @Eid)";
+                "(@Eid, @StudentName, @Course, @EnrollDate);\nSELECT Eid, StudentName, Course, Enr" +
+                "ollDate FROM Enroll WHERE (Eid = @Eid)";
             this._adapter.InsertCommand.CommandType = global::System.Data.CommandType.Text;
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Eid", global::System.Data.SqlDbType.Int, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Eid", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@StudentName", global::System.Data.SqlDbType.NChar, 0, global::System.Data.ParameterDirection.Input, 0, 0, "StudentName", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
