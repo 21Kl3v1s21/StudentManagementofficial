@@ -28,89 +28,54 @@ namespace StudentManagement
             return Regex.IsMatch(email, pattern);
         }
 
-        // Client-side validation before updating
-        private bool ValidateInputsForUpdate()
+        // Centralized method for validating textboxes
+        private bool ValidateTextBoxInputs(TextBox studentIdTextBox, TextBox studentNameTextBox, TextBox phoneTextBox, TextBox emailTextBox, bool checkForExistingStudent = false)
         {
-            if (string.IsNullOrWhiteSpace(textBox1.Text) || !int.TryParse(textBox1.Text, out int studentId))
+            // Validate StudentId
+            if (string.IsNullOrWhiteSpace(studentIdTextBox.Text) || !int.TryParse(studentIdTextBox.Text, out int studentId))
             {
                 MessageBox.Show("Please enter a valid StudentId.");
-                SetTextBoxBorderColor(textBox1, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(studentIdTextBox, false);
                 return false;
             }
-            SetTextBoxBorderColor(textBox1, true);  // Reset border for valid input
+            SetTextBoxBorderColor(studentIdTextBox, true);
 
-            if (string.IsNullOrWhiteSpace(textBox2.Text))
+            // Validate StudentName
+            if (string.IsNullOrWhiteSpace(studentNameTextBox.Text))
             {
                 MessageBox.Show("Please enter a student name.");
-                SetTextBoxBorderColor(textBox2, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(studentNameTextBox, false);
                 return false;
             }
-            SetTextBoxBorderColor(textBox2, true);  // Reset border for valid input
+            SetTextBoxBorderColor(studentNameTextBox, true);
 
-            if (string.IsNullOrWhiteSpace(textBox3.Text) || string.IsNullOrWhiteSpace(textBox4.Text))
+            // Validate Phone and Email
+            if (string.IsNullOrWhiteSpace(phoneTextBox.Text) || string.IsNullOrWhiteSpace(emailTextBox.Text))
             {
                 MessageBox.Show("Please fill in all fields.");
-                SetTextBoxBorderColor(textBox3, false);  // Set red border for invalid input
-                SetTextBoxBorderColor(textBox4, false);
+                SetTextBoxBorderColor(phoneTextBox, false);
+                SetTextBoxBorderColor(emailTextBox, false);
                 return false;
             }
-            SetTextBoxBorderColor(textBox3, true);  // Reset border for valid input
-            SetTextBoxBorderColor(textBox4, true);
+            SetTextBoxBorderColor(phoneTextBox, true);
+            SetTextBoxBorderColor(emailTextBox, true);
 
-            if (!IsValidEmail(textBox4.Text))
+            if (!IsValidEmail(emailTextBox.Text))
             {
                 MessageBox.Show("Please enter a valid email.");
-                SetTextBoxBorderColor(textBox4, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(emailTextBox, false);
                 return false;
             }
-            SetTextBoxBorderColor(textBox4, true);  // Reset border for valid input
+            SetTextBoxBorderColor(emailTextBox, true);
 
-            return true;
-        }
-
-        // Method to add student
-        private bool ValidateInputsForAdd()
-        {
-            if (string.IsNullOrWhiteSpace(textBox1.Text) || !int.TryParse(textBox1.Text, out int studentId))
-            {
-                MessageBox.Show("Please enter a valid StudentId.");
-                SetTextBoxBorderColor(textBox1, false);  // Set red border for invalid input
-                return false;
-            }
-            SetTextBoxBorderColor(textBox1, true);  // Reset border for valid input
-
-            if (string.IsNullOrWhiteSpace(textBox2.Text))
-            {
-                MessageBox.Show("Please enter a student name.");
-                SetTextBoxBorderColor(textBox2, false);  // Set red border for invalid input
-                return false;
-            }
-            SetTextBoxBorderColor(textBox2, true);  // Reset border for valid input
-
-            if (string.IsNullOrWhiteSpace(textBox3.Text) || string.IsNullOrWhiteSpace(textBox4.Text))
-            {
-                MessageBox.Show("Please fill in all fields.");
-                SetTextBoxBorderColor(textBox3, false);  // Set red border for invalid input
-                SetTextBoxBorderColor(textBox4, false);
-                return false;
-            }
-            SetTextBoxBorderColor(textBox3, true);  // Reset border for valid input
-            SetTextBoxBorderColor(textBox4, true);
-
-            if (!IsValidEmail(textBox4.Text))
-            {
-                MessageBox.Show("Please enter a valid email.");
-                SetTextBoxBorderColor(textBox4, false);  // Set red border for invalid input
-                return false;
-            }
-            SetTextBoxBorderColor(textBox4, true);  // Reset border for valid input
-
-            if (StudentExists(int.Parse(textBox1.Text)))
+            // Check if the student already exists (if needed)
+            if (checkForExistingStudent && StudentExists(studentId))
             {
                 MessageBox.Show("A student with this ID already exists.");
-                SetTextBoxBorderColor(textBox1, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(studentIdTextBox, false);
                 return false;
             }
+
             return true;
         }
 
@@ -129,10 +94,10 @@ namespace StudentManagement
             }
         }
 
-        // Save button event handler
+        // Save button event handler (Update existing student)
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (!ValidateInputsForUpdate())
+            if (!ValidateTextBoxInputs(textBox1, textBox2, textBox3, textBox4))
                 return; // Exit if validation fails
 
             try
@@ -146,30 +111,7 @@ namespace StudentManagement
                     return; // Exit if the student doesn't exist
                 }
 
-                using (SqlConnection con = GetConnection())
-                {
-                    con.Open();
-                    using (SqlCommand cmd = new SqlCommand("UPDATE Student SET studentname=@studentname, phone=@phone, email=@email WHERE studentid=@studentid", con))
-                    {
-                        cmd.Parameters.AddWithValue("@StudentId", studentId);
-                        cmd.Parameters.AddWithValue("@StudentName", textBox2.Text);
-                        cmd.Parameters.AddWithValue("@Phone", textBox3.Text);
-                        cmd.Parameters.AddWithValue("@Email", textBox4.Text);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-
-                        if (rowsAffected > 0)
-                        {
-                            MessageBox.Show("Record Updated Successfully!");
-                            LoadStudentData(); // Refresh DataGridView after saving
-                            ResetTextBoxes();  // Clear textboxes after saving
-                        }
-                        else
-                        {
-                            MessageBox.Show("Failed to update student.");
-                        }
-                    }
-                }
+                UpdateStudent(studentId);
             }
             catch (Exception ex)
             {
@@ -177,10 +119,39 @@ namespace StudentManagement
             }
         }
 
-        // Method to add student
+        // Method to update student details in the database
+        private void UpdateStudent(int studentId)
+        {
+            using (SqlConnection con = GetConnection())
+            {
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand("UPDATE Student SET studentname=@studentname, phone=@phone, email=@email WHERE studentid=@studentid", con))
+                {
+                    cmd.Parameters.AddWithValue("@StudentId", studentId);
+                    cmd.Parameters.AddWithValue("@StudentName", textBox2.Text);
+                    cmd.Parameters.AddWithValue("@Phone", textBox3.Text);
+                    cmd.Parameters.AddWithValue("@Email", textBox4.Text);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        MessageBox.Show("Record Updated Successfully!");
+                        LoadStudentData(); // Refresh DataGridView after saving
+                        ResetTextBoxes();  // Clear textboxes after saving
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to update student.");
+                    }
+                }
+            }
+        }
+
+        // Method to add student (Insert new record)
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (!ValidateInputsForAdd())
+            if (!ValidateTextBoxInputs(textBox1, textBox2, textBox3, textBox4, true)) // Check if student exists
                 return; // Exit if validation fails
 
             try
@@ -245,21 +216,7 @@ namespace StudentManagement
                     return;  // Exit if no student is found with the given ID
                 }
 
-                using (SqlConnection con = GetConnection())
-                {
-                    con.Open();
-                    // Delete the student record based on the provided StudentId
-                    using (SqlCommand cmd = new SqlCommand("DELETE FROM Student WHERE studentid=@studentid", con))
-                    {
-                        cmd.Parameters.AddWithValue("@StudentId", studentId);
-                        cmd.ExecuteNonQuery();
-                    }
-                    MessageBox.Show("Record Deleted Successfully!");
-
-                    // After deletion, reset the textboxes and refresh the DataGridView
-                    ResetTextBoxes();  // Clear the input fields
-                    LoadStudentData(); // Refresh DataGridView to reflect the updated data
-                }
+                DeleteStudent(studentId);
             }
             catch (Exception ex)
             {
@@ -267,6 +224,22 @@ namespace StudentManagement
             }
         }
 
+        // Method to delete student
+        private void DeleteStudent(int studentId)
+        {
+            using (SqlConnection con = GetConnection())
+            {
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand("DELETE FROM Student WHERE studentid=@studentid", con))
+                {
+                    cmd.Parameters.AddWithValue("@StudentId", studentId);
+                    cmd.ExecuteNonQuery();
+                }
+                MessageBox.Show("Record Deleted Successfully!");
+                ResetTextBoxes();  // Clear the input fields
+                LoadStudentData(); // Refresh DataGridView to reflect the updated data
+            }
+        }
 
         // Load data into the DataGridView
         private void Student_Load(object sender, EventArgs e)

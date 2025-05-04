@@ -35,43 +35,25 @@ namespace StudentManagement
             }
         }
 
-        // Validate input before updating course
+        // Centralized method for validating inputs before updating the course
         private bool ValidateInputsForUpdate()
         {
-            if (string.IsNullOrWhiteSpace(textBox1.Text) || !int.TryParse(textBox1.Text, out int courseId))
-            {
-                MessageBox.Show("Please enter a valid CourseId.");
-                SetTextBoxBorderColor(textBox1, false);  // Set red border for invalid input
-                return false;
-            }
-            SetTextBoxBorderColor(textBox1, true);
-
-            if (string.IsNullOrWhiteSpace(textBox2.Text))
-            {
-                MessageBox.Show("Please enter a course name.");
-                SetTextBoxBorderColor(textBox2, false);  // Set red border for invalid input
-                return false;
-            }
-            SetTextBoxBorderColor(textBox2, true);
-
-            if (string.IsNullOrWhiteSpace(textBox3.Text))
-            {
-                MessageBox.Show("Please enter a valid Duration.");
-                SetTextBoxBorderColor(textBox3, false);  // Set red border for invalid input
-                return false;
-            }
-            SetTextBoxBorderColor(textBox3, true);
-
-            return true;
+            return ValidateCourseInputs(false); // Check for valid inputs without checking for existing course
         }
 
-        // Validate input before adding a course
+        // Centralized method for validating inputs before adding the course
         private bool ValidateInputsForAdd()
+        {
+            return ValidateCourseInputs(true); // Check for valid inputs and if course exists
+        }
+
+        // Validate inputs for both Add and Update
+        private bool ValidateCourseInputs(bool checkForExistingCourse)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text) || !int.TryParse(textBox1.Text, out int courseId))
             {
                 MessageBox.Show("Please enter a valid CourseId.");
-                SetTextBoxBorderColor(textBox1, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(textBox1, false);
                 return false;
             }
             SetTextBoxBorderColor(textBox1, true);
@@ -79,7 +61,7 @@ namespace StudentManagement
             if (string.IsNullOrWhiteSpace(textBox2.Text))
             {
                 MessageBox.Show("Please enter a course name.");
-                SetTextBoxBorderColor(textBox2, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(textBox2, false);
                 return false;
             }
             SetTextBoxBorderColor(textBox2, true);
@@ -87,15 +69,16 @@ namespace StudentManagement
             if (string.IsNullOrWhiteSpace(textBox3.Text))
             {
                 MessageBox.Show("Please enter a valid Duration.");
-                SetTextBoxBorderColor(textBox3, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(textBox3, false);
                 return false;
             }
             SetTextBoxBorderColor(textBox3, true);
 
-            if (CourseExists(int.Parse(textBox1.Text)))
+            // Check if the course exists only for Add operation
+            if (checkForExistingCourse && CourseExists(int.Parse(textBox1.Text)))
             {
                 MessageBox.Show("A course with this ID already exists.");
-                SetTextBoxBorderColor(textBox1, false);  // Set red border for invalid input
+                SetTextBoxBorderColor(textBox1, false);
                 return false;
             }
 
@@ -136,44 +119,46 @@ namespace StudentManagement
             {
                 int courseId = int.Parse(textBox1.Text);
 
-                // Debugging: Output the CourseId and parameters to verify their correctness
-                MessageBox.Show($"Updating course with ID: {courseId}\nCourse: {textBox2.Text}\nDuration: {textBox3.Text}");
-
-                // Check if the course exists
+                // Check if the course exists before updating
                 if (!CourseExists(courseId))
                 {
                     MessageBox.Show("Course with this ID does not exist. Please check the CourseId.");
                     return; // Exit if the course doesn't exist
                 }
 
-                using (SqlConnection con = GetConnection())
-                {
-                    con.Open();
-                    using (SqlCommand cmd = new SqlCommand("UPDATE Course SET Course=@Course, Duration=@Duration WHERE CourseId=@CourseId", con))
-                    {
-                        cmd.Parameters.AddWithValue("@CourseId", courseId);
-                        cmd.Parameters.AddWithValue("@Course", textBox2.Text);
-                        cmd.Parameters.AddWithValue("@Duration", textBox3.Text);
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-
-                        // Check if any rows were affected
-                        if (rowsAffected > 0)
-                        {
-                            MessageBox.Show("Record Updated Successfully!");
-                            LoadCourseData(); // Refresh the DataGridView after saving
-                            ResetTextBoxes();  // Clear textboxes after saving
-                        }
-                        else
-                        {
-                            MessageBox.Show("No records were updated. Please check the CourseId.");
-                        }
-                    }
-                }
+                UpdateCourse(courseId);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.Message);
+            }
+        }
+
+        // Method to update course details in the database
+        private void UpdateCourse(int courseId)
+        {
+            using (SqlConnection con = GetConnection())
+            {
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand("UPDATE Course SET Course=@Course, Duration=@Duration WHERE CourseId=@CourseId", con))
+                {
+                    cmd.Parameters.AddWithValue("@CourseId", courseId);
+                    cmd.Parameters.AddWithValue("@Course", textBox2.Text);
+                    cmd.Parameters.AddWithValue("@Duration", textBox3.Text);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        MessageBox.Show("Record Updated Successfully!");
+                        LoadCourseData(); // Refresh DataGridView after saving
+                        ResetTextBoxes();  // Clear textboxes after saving
+                    }
+                    else
+                    {
+                        MessageBox.Show("No records were updated. Please check the CourseId.");
+                    }
+                }
             }
         }
 
@@ -221,21 +206,7 @@ namespace StudentManagement
                 }
                 SetTextBoxBorderColor(textBox1, true);  // Reset border to normal if input is valid
 
-                using (SqlConnection con = GetConnection())
-                {
-                    con.Open();
-                    // Delete the record based on the provided CourseId
-                    using (SqlCommand cmd = new SqlCommand("DELETE FROM Course WHERE CourseId=@CourseId", con))
-                    {
-                        cmd.Parameters.AddWithValue("@CourseId", courseId);
-                        cmd.ExecuteNonQuery();
-                    }
-                    MessageBox.Show("Record Deleted Successfully!");
-
-                    // After deletion, reset the textboxes and refresh the DataGridView
-                    ResetTextBoxes();
-                    LoadCourseData(); // Refresh the DataGridView after deletion
-                }
+                DeleteCourse(courseId);
             }
             catch (Exception ex)
             {
@@ -243,6 +214,22 @@ namespace StudentManagement
             }
         }
 
+        // Method to delete course
+        private void DeleteCourse(int courseId)
+        {
+            using (SqlConnection con = GetConnection())
+            {
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand("DELETE FROM Course WHERE CourseId=@CourseId", con))
+                {
+                    cmd.Parameters.AddWithValue("@CourseId", courseId);
+                    cmd.ExecuteNonQuery();
+                }
+                MessageBox.Show("Record Deleted Successfully!");
+                ResetTextBoxes();  // Clear the input fields
+                LoadCourseData(); // Refresh DataGridView to reflect the updated data
+            }
+        }
 
         // Load Course data into DataGridView on form load
         private void Course_Load(object sender, EventArgs e)
